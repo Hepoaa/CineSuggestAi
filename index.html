@@ -4,7 +4,10 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CineSuggest AI</title>
+    <title>CineSuggest AI: AI Movie & Series Finder | Personalized Recommendations</title>
+    <meta name="description" content="Discover your next favorite movie or series with CineSuggest AI. Our advanced AI understands natural language to give you personalized recommendations. Just describe what you're looking for, and we'll find it!" />
+    <meta name="keywords" content="AI movie finder, movie recommendations, series suggestions, what to watch, cinema AI, movie search engine, CineSuggest">
+    <meta name="robots" content="index, follow">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
@@ -40,12 +43,12 @@
 </script>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8183693615571172"
      crossorigin="anonymous"></script>
-<!-- Add Babel Standalone for in-browser transpilation -->
-<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 </head>
   <body class="bg-base-100">
     <div id="root"></div>
-    <!-- Load the main React component with Babel, which transpiles JSX and TS -->
-    <script type="text/babel" data-presets="env,react,typescript" data-type="module" src="./index.tsx"></script>
+    <!-- Load the main React component as a module. 
+         The in-browser Babel transpiler has been removed to fix performance and loading issues. 
+         This assumes the development environment handles TSX transpilation, which is standard practice. -->
+    <script type="module" src="./index.tsx"></script>
   </body>
 </html>

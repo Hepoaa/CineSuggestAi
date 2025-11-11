@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { DetailedTMDbResult, TMDbResult } from '../types.ts';
 import { TMDB_IMAGE_BASE_URL } from '../constants.ts';
@@ -61,7 +60,7 @@ export const DetailView: React.FC<DetailViewProps> = ({ item, isOpen, isLoading,
                     <>
                         {/* Backdrop and Header */}
                         <div className="relative h-60 md:h-80">
-                            <img src={backdropUrl} alt="" className="absolute inset-0 w-full h-full object-cover opacity-30" />
+                            <img src={backdropUrl} alt={title ? `Backdrop for ${title}` : 'Movie or series backdrop'} className="absolute inset-0 w-full h-full object-cover opacity-30" />
                             <div className="absolute inset-0 bg-gradient-to-t from-base-100 via-base-100/50 to-transparent"></div>
                             <button onClick={onClose} className="absolute top-4 right-4 text-white bg-black/50 rounded-full p-2 hover:bg-brand-accent transition-colors">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">

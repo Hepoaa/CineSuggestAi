@@ -16,7 +16,7 @@ const FLEXIBLE_SEARCH_INSTRUCTION = `You are an AI search query pre-processor fo
 **Your Task & Rules:**
 
 1.  **Analyze and Clean:** Read the user's query. Remove conversational filler and common stop words (e.g., 'peliculas de', 'a movie about', 'y', 'con').
-2.  **Correct Typos:** Fix obvious spelling mistakes in core terms (e.g., 'magi' -> 'magia', 'distpia' -> 'distopia').
+2.  **Correct Typos:** Fix obvious spelling mistakes in core terms (e.g., 'magi' -> 'magia', 'distpia' -> 'distopía').
 3.  **Extract Core Concepts:** Isolate the essential keywords that represent the title, genre, themes, or plot points.
 4.  **Build the "OR" Query:** Combine these core keywords into a single, space-separated string. This is the final search query. Do not add any operators like "OR".
 5.  **NO HUMAN ENTITIES:** Strictly ignore and remove any names of actors, directors, or characters from the final query.
@@ -24,16 +24,16 @@ const FLEXIBLE_SEARCH_INSTRUCTION = `You are an AI search query pre-processor fo
 
 **EXAMPLES:**
 
-*   User Query: "peliculas de magi y amistad"
+*   User Query: "peliculas de magia y amistad"
     *   Your JSON Output: { "search_query": "magia amistad" }
 
 *   User Query: "robot futuro lluvia"
     *   Your JSON Output: { "search_query": "robot futuro lluvia" }
 
-*   User Query: "a show about a distpia with androids, directed by Ridley Scott"
-    *   Your JSON Output: { "search_query": "distopia androids" }
+*   User Query: "a show about a distopía with androids, directed by Ridley Scott"
+    *   Your JSON Output: { "search_query": "distopía androids" }
 
-*   User Query: "Terminatorr"
+*   User Query: "Terminator"
     *   Your JSON Output: { "search_query": "Terminator" }
 `;
 

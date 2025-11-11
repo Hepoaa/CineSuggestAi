@@ -18,7 +18,7 @@ export const Header: React.FC<HeaderProps> = ({ onViewChange, language, onLangua
                     CineSuggest AI
                 </h1>
                 <p className="text-text-secondary text-sm hidden md:block">
-                    Your AI-powered movie guide.
+                    Find movies & series by describing anything you remember.
                 </p>
             </div>
             <nav className="flex items-center gap-4 md:gap-6">
