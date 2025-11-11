@@ -1,8 +1,33 @@
+
 import { GoogleGenAI, Type } from '@google/genai';
 import { AISearchData, ChatMessage } from '../types.ts';
 
-// The API key is securely managed by the environment.
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
+// Lazily initialize the AI instance to prevent crash on load if API key is missing.
+let ai: GoogleGenAI | null = null;
+let initializationError: string | null = null;
+
+const getAiInstance = (): GoogleGenAI | null => {
+  if (ai) return ai;
+  if (initializationError) return null;
+
+  try {
+    // The API key is securely managed by the environment.
+    // On environments like GitHub pages, `process.env.API_KEY` may not be available.
+    // We check for it to prevent a runtime crash.
+    // @ts-ignore - 'process' is not defined in a browser-targeted TS project.
+    if (typeof process === 'undefined' || !process.env || !process.env.API_KEY) {
+      throw new Error('API_KEY environment variable not found.');
+    }
+    // @ts-ignore
+    ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    return ai;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'An unknown error occurred during AI initialization.';
+    initializationError = message;
+    console.error("Could not initialize Gemini AI. AI features will be disabled.", message);
+    return null;
+  }
+};
 
 const FLEXIBLE_SEARCH_INSTRUCTION = `You are an AI search query pre-processor for a movie/TV show database. Your mission is to translate a user's query into an optimal search string for a flexible, metadata-based search engine. The search must be exhaustive and ignore people (actors, directors).
 
@@ -36,8 +61,14 @@ const FLEXIBLE_SEARCH_INSTRUCTION = `You are an AI search query pre-processor fo
 `;
 
 export const getSearchTermsFromAI = async (query: string): Promise<AISearchData> => {
+  const aiInstance = getAiInstance();
+  if (!aiInstance) {
+    console.warn("AI search term generation disabled. Falling back to raw query.");
+    return { search_query: query };
+  }
+
   try {
-    const response = await ai.models.generateContent({
+    const response = await aiInstance.models.generateContent({
       model: 'gemini-2.5-flash',
       contents: `User Query: "${query}"`,
       config: {
@@ -74,6 +105,11 @@ export const getSearchTermsFromAI = async (query: string): Promise<AISearchData>
 const CHAT_SYSTEM_INSTRUCTION = `You are CineSuggest AI, a friendly and knowledgeable chatbot specializing in movies and TV shows. Your goal is to have a natural conversation with the user, helping them discover new things to watch, answer trivia, or just chat about film. Be conversational, engaging, and helpful. Don't just provide lists; explain why you're suggesting something. Keep your responses concise and easy to read.`;
 
 export const getChatResponseFromAI = async (history: ChatMessage[]): Promise<string> => {
+    const aiInstance = getAiInstance();
+    if (!aiInstance) {
+      throw new Error("AI service is not available. Please ensure the API key is configured correctly.");
+    }
+
     // Convert the app's message format to the format expected by the Gemini API
     const contents = history
         .filter(msg => msg.role !== 'error')
@@ -83,7 +119,7 @@ export const getChatResponseFromAI = async (history: ChatMessage[]): Promise<str
         }));
 
     try {
-        const response = await ai.models.generateContent({
+        const response = await aiInstance.models.generateContent({
             model: 'gemini-2.5-flash',
             contents: contents,
             config: {
