@@ -1,7 +1,7 @@
 import React from 'react';
 import { DetailedTMDbResult, TMDbResult } from '../types.ts';
 import { TMDB_IMAGE_BASE_URL } from '../constants.ts';
-import { CardMedia } from './CardMedia.tsx';
+import { MovieCard } from './MovieCard.tsx';
 
 interface DetailViewProps {
     item: DetailedTMDbResult | null;
@@ -123,8 +123,8 @@ export const DetailView: React.FC<DetailViewProps> = ({ item, isOpen, isLoading,
                                     {item.similar.map(similarItem => {
                                       const isSimFavorite = favorites.includes(`${similarItem.media_type}:${similarItem.id}`);
                                       return (
-                                        <div key={similarItem.id} className="w-48 flex-shrink-0">
-                                            <CardMedia 
+                                        <div key={similarItem.id} className="w-40 flex-shrink-0">
+                                            <MovieCard 
                                                 item={{...similarItem, isFavorite: isSimFavorite}} 
                                                 onToggleFavorite={onToggleFavorite} 
                                                 onViewDetails={onSelectSimilar}

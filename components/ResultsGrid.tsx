@@ -1,6 +1,6 @@
 import React from 'react';
 import { TMDbResult } from '../types.ts';
-import { CardMedia } from './CardMedia.tsx';
+import { MovieCard } from './MovieCard.tsx';
 
 interface ResultsGridProps {
   results: TMDbResult[];
@@ -16,7 +16,7 @@ export const ResultsGrid: React.FC<ResultsGridProps> = ({ results, onToggleFavor
     <>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8">
         {results.map((result) => (
-          <CardMedia 
+          <MovieCard 
               key={`${result.media_type}-${result.id}`} 
               item={result} 
               onToggleFavorite={onToggleFavorite}
