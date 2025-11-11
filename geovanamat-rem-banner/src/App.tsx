@@ -11,7 +11,7 @@ function App() {
     <>
   <div className="w-screen h-screen flex flex-col items-center overflow-hidden relative">
     <img
-      src="remtop.webp"
+      src="/remtop.webp"
       className="absolute max-h-full max-w-full object-contain mt-[5%] z-0 animate-slide-up"
       alt="Rem foto"
     />

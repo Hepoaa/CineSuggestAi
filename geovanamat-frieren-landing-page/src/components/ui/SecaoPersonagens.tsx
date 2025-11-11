@@ -29,19 +29,19 @@ export default function SecaoPersonagens() {
     <CardPersonagem
       nome="Frieren"
       descricao="Uma elfa maga que explora o mundo com calma e sabedoria."
-      imagem="Frierenfoto.jpeg"
+      imagem="/Frierenfoto.jpeg"
       tags={["Mago", "Elfa", "Aventureira"]}
     />
     <CardPersonagem
       nome="Fern"
       descricao="Uma elfa maga que explora o mundo com calma e sabedoria."
-      imagem="Fern.jpeg"
+      imagem="/Fern.jpeg"
       tags={["Mago", "Humano", "Aventureira"]}
     />
     <CardPersonagem
       nome="Frieren"
       descricao="Uma elfa maga que explora o mundo com calma e sabedoria."
-      imagem="Stark.jpeg"
+      imagem="/Stark.jpeg"
       tags={["Guerreiro", "Humano", "Aventureiro"]}
     />
     </div>
