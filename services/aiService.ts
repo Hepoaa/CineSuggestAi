@@ -11,17 +11,31 @@ const getAiInstance = (): GoogleGenAI | null => {
   if (initializationError) return null;
 
   try {
-    // The API key is securely managed by the environment.
-    // On environments like GitHub pages, `process.env.API_KEY` may not be available.
-    // We check for it to prevent a runtime crash.
-    // @ts-ignore - 'process' is not defined in a browser-targeted TS project.
-    if (typeof process === 'undefined' || !process.env || !process.env.API_KEY) {
+    let apiKey: string | undefined = undefined;
+
+    // This block safely tries to access the environment variable.
+    // It is expected to fail in a browser environment.
+    try {
+      // @ts-ignore - 'process' is not available in the browser scope.
+      if (typeof process !== 'undefined' && process.env && process.env.API_KEY) {
+        // @ts-ignore
+        apiKey = process.env.API_KEY;
+      }
+    } catch (e) {
+      // In a browser, accessing 'process' throws a ReferenceError.
+      // We catch it, and apiKey remains undefined, which is the expected behavior.
+    }
+
+    if (!apiKey) {
+      // This is the normal path for a browser environment without an API key.
       throw new Error('API_KEY environment variable not found.');
     }
-    // @ts-ignore
-    ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+
+    ai = new GoogleGenAI({ apiKey: apiKey });
     return ai;
+
   } catch (error) {
+    // This outer catch handles the "API_KEY not found" error and any other initialization errors.
     const message = error instanceof Error ? error.message : 'An unknown error occurred during AI initialization.';
     initializationError = message;
     console.error("Could not initialize Gemini AI. AI features will be disabled.", message);
