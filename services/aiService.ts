@@ -1,10 +1,8 @@
+import { GoogleGenAI, Type } from '@google/genai';
 import { AISearchData, ChatMessage } from '../types.ts';
 
-const OPENROUTER_API_BASE = 'https://openrouter.ai/api/v1';
-const AI_MODEL = 'openrouter/polaris-alpha';
-// Per user's explicit instruction to make the app functional, the API key is hardcoded here.
-const OPENROUTER_API_KEY = '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';
-
+// The API key is securely managed by the environment.
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
 
 const FLEXIBLE_SEARCH_INSTRUCTION = `You are an AI search query pre-processor for a movie/TV show database. Your mission is to translate a user's query into an optimal search string for a flexible, metadata-based search engine. The search must be exhaustive and ignore people (actors, directors).
 
@@ -38,36 +36,27 @@ const FLEXIBLE_SEARCH_INSTRUCTION = `You are an AI search query pre-processor fo
 `;
 
 export const getSearchTermsFromAI = async (query: string): Promise<AISearchData> => {
-  const apiKey = OPENROUTER_API_KEY;
-  if (!apiKey) {
-    console.warn("API key not found. Falling back to raw query.");
-    return { search_query: query };
-  }
-  
   try {
-    const response = await fetch(`${OPENROUTER_API_BASE}/chat/completions`, {
-        method: 'POST',
-        headers: {
-            'Authorization': `Bearer ${apiKey}`,
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            model: AI_MODEL,
-            messages: [
-                { role: 'system', content: FLEXIBLE_SEARCH_INSTRUCTION },
-                { role: 'user', content: `User Query: "${query}"` }
-            ],
-            response_format: { type: 'json_object' }
-        })
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: `User Query: "${query}"`,
+      config: {
+        systemInstruction: FLEXIBLE_SEARCH_INSTRUCTION,
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            search_query: {
+              type: Type.STRING,
+              description: 'The processed search query string with core concepts separated by spaces.'
+            }
+          },
+          required: ['search_query']
+        }
+      }
     });
 
-    if (!response.ok) {
-        const errorBody = await response.json().catch(() => ({ error: { message: "Unknown error" } }));
-        throw new Error(`OpenRouter API error: ${response.status} - ${JSON.stringify(errorBody)}`);
-    }
-
-    const data = await response.json();
-    const jsonString = data.choices[0]?.message?.content;
+    const jsonString = response.text;
     
     if (!jsonString) {
       throw new Error("AI returned an empty response.");
@@ -76,7 +65,7 @@ export const getSearchTermsFromAI = async (query: string): Promise<AISearchData>
     return JSON.parse(jsonString) as AISearchData;
 
   } catch (error) {
-    console.error("Error calling OpenRouter API for search:", error);
+    console.error("Error calling Gemini API for search:", error);
     console.warn("AI search term generation failed. Falling back to raw query.");
     return { search_query: query };
   }
@@ -85,41 +74,24 @@ export const getSearchTermsFromAI = async (query: string): Promise<AISearchData>
 const CHAT_SYSTEM_INSTRUCTION = `You are CineSuggest AI, a friendly and knowledgeable chatbot specializing in movies and TV shows. Your goal is to have a natural conversation with the user, helping them discover new things to watch, answer trivia, or just chat about film. Be conversational, engaging, and helpful. Don't just provide lists; explain why you're suggesting something. Keep your responses concise and easy to read.`;
 
 export const getChatResponseFromAI = async (history: ChatMessage[]): Promise<string> => {
-    const apiKey = OPENROUTER_API_KEY;
-    if (!apiKey) {
-        throw new Error("API key not configured for AI Chat.");
-    }
-    
-    const messages = [
-        { role: 'system', content: CHAT_SYSTEM_INSTRUCTION },
-        ...history
-            .filter(msg => msg.role !== 'error')
-            .map(msg => ({
-                role: msg.role === 'ai' ? 'assistant' : 'user',
-                content: msg.content
-            }))
-    ];
+    // Convert the app's message format to the format expected by the Gemini API
+    const contents = history
+        .filter(msg => msg.role !== 'error')
+        .map(msg => ({
+            role: msg.role === 'ai' ? 'model' : 'user',
+            parts: [{ text: msg.content }]
+        }));
 
     try {
-        const response = await fetch(`${OPENROUTER_API_BASE}/chat/completions`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${apiKey}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                model: AI_MODEL,
-                messages: messages
-            })
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: contents,
+            config: {
+              systemInstruction: CHAT_SYSTEM_INSTRUCTION
+            }
         });
 
-        if (!response.ok) {
-            const errorBody = await response.json().catch(() => ({ error: { message: "Unknown error" } }));
-            throw new Error(`OpenRouter API error: ${response.status} - ${JSON.stringify(errorBody)}`);
-        }
-        
-        const data = await response.json();
-        const content = data.choices[0]?.message?.content;
+        const content = response.text;
 
         if (!content) {
             throw new Error("AI returned an empty or invalid chat response.");
@@ -127,7 +99,7 @@ export const getChatResponseFromAI = async (history: ChatMessage[]): Promise<str
         
         return content;
     } catch (error) {
-        console.error("Error calling OpenRouter API for chat:", error);
+        console.error("Error calling Gemini API for chat:", error);
         throw new Error("Failed to get chat response from AI.");
     }
 };
